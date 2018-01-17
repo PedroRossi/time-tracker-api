@@ -9,11 +9,23 @@ class Api::V1::TimelogsController < ApplicationController
   # GET /timelogs
   def index
     if params[:user_id]
-      @timelogs = User.find(params[:user_id]).timelogs.where(project_id: params[:project_id])
+      if params[:date]
+        @timelogs = User.find(params[:user_id]).timelogs.by_date(params[:date]).order('created_at DESC')
+      else
+        @timelogs = User.find(params[:user_id]).timelogs.where(project_id: params[:project_id])
+      end
     elsif params[:project_id]
-      @timelogs = Project.find(params[:project_id]).timelogs
+      if params[:date]
+        @timelogs = Project.find(params[:project_id]).timelogs.by_date(params[:date]).order('created_at DESC')
+      else
+        @timelogs = Project.find(params[:project_id]).timelogs
+      end  
     else
-      @timelogs = Timelog.all
+      if params[:date]
+        @timelogs = Timelog.by_date(params[:date]).order('created_at DESC')
+      else
+        @timelogs = Timelog.all
+      end
     end
     render json: @timelogs
   end
