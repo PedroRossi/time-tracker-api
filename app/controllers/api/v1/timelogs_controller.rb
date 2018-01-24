@@ -7,22 +7,24 @@ class Api::V1::TimelogsController < ApplicationController
   # 5) api/v1/projects/:project_id/timelogs ---------> Project owner sees everybody's timelogs from a project [Index]
   
   # GET /timelogs
+  # /timelogs?initialDate=20-01-2018&finalDate=24-01-2018
+
   def index
     if params[:user_id]
-      if params[:date]
-        @timelogs = User.find(params[:user_id]).timelogs.by_date(params[:date]).order('created_at DESC')
+      if params[:initialDate] && params[:finalDate]
+        @timelogs = User.find(params[:user_id]).timelogs.by_date(params[:initialDate], params[:finalDate]).order('created_at DESC')
       else
         @timelogs = User.find(params[:user_id]).timelogs.where(project_id: params[:project_id])
       end
     elsif params[:project_id]
-      if params[:date]
-        @timelogs = Project.find(params[:project_id]).timelogs.by_date(params[:date]).order('created_at DESC')
+      if params[:initialDate] && params[:finalDate]
+        @timelogs = Project.find(params[:project_id]).timelogs.by_date(params[:initialDate], params[:finalDate]).order('created_at DESC')
       else
         @timelogs = Project.find(params[:project_id]).timelogs
       end  
     else
-      if params[:date]
-        @timelogs = Timelog.by_date(params[:date]).order('created_at DESC')
+      if params[:initialDate] && params[:finalDate]
+        @timelogs = Timelog.by_date(params[:initialDate], params[:finalDate]).order('created_at DESC')
       else
         @timelogs = Timelog.all
       end
