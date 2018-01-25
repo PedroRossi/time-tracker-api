@@ -6,6 +6,14 @@ git_source(:github) do |repo_name|
 end
 
 
+gem "google-cloud"
+gem "jquery-rails"
+gem "fog"
+# [START omniauth]
+gem "omniauth"
+gem "omniauth-google-oauth2"
+# [END omniauth]
+
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 5.1.4'
 # Use postgresql as the database for Active Record
