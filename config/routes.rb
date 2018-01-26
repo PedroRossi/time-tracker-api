@@ -1,4 +1,20 @@
 Rails.application.routes.draw do
+  get 'sessions/index'
+
+  # [START login]
+  get "/login", to: redirect("auth/google_oauth2")
+  # [END login]
+
+  # [START sessions]
+  get "/auth/google_oauth2/callback", to: "sessions#create"
+
+  resource :session, only: [:create, :destroy]
+  # [END sessions]
+
+  # [START logout]
+  get "/logout", to: "sessions#destroy"
+  # [END logout]
+
   namespace 'api' do
     namespace 'v1' do
       # 1) api/v1/users -------------------> View all users in organization, create new users [Every http method]
@@ -9,20 +25,6 @@ Rails.application.routes.draw do
       # 6) api/v1/users/:user_id/projects/:project_id/timelogs ---------------> See timelogs from a user in a project, user creates a timelog (maybe temporary) [Index, Update, Create, Destroy]
 
       resources :users #1
-
-      # [START login]
-      get "/login", to: redirect("/auth/google_oauth2")
-      # [END login]
-
-      # [START sessions]
-      get "/auth/google_oauth2/callback", to: "sessions#create"
-
-      resource :session, only: [:create, :destroy]
-      # [END sessions]
-
-      # [START logout]
-      get "/logout", to: "sessions#destroy"
-      # [END logout]
 
       resources :timelogs, except: [:create, :delete, :update] #2
       resources :projects, except: [:create, :delete, :update] #3
