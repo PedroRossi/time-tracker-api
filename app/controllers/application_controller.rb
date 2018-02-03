@@ -13,6 +13,7 @@
 
 # [START helper_methods]
 class ApplicationController < ActionController::Base
+ config.navigational_formats = []
  helper_method :logged_in?, :current_user
 
  def logged_in?

@@ -13,8 +13,10 @@ class Api::V1::TimelogsController < ApplicationController
     if params[:user_id]
       if params[:initialDate] && params[:finalDate]
         @timelogs = User.find(params[:user_id]).timelogs.by_date(params[:initialDate], params[:finalDate]).order('created_at DESC')
-      else
+      elsif params[:project_id]
         @timelogs = User.find(params[:user_id]).timelogs.where(project_id: params[:project_id])
+      else
+        @timelogs = User.find(params[:user_id]).timelogs
       end
     elsif params[:project_id]
       if params[:initialDate] && params[:finalDate]
@@ -57,7 +59,7 @@ class Api::V1::TimelogsController < ApplicationController
         render json: @timelog.errors, status: :unprocessable_entity
       end
     else
-      render json: {status: @timelog.user_id, status2: params[:user_id]}
+      render json: {owner: @timelog.user_id, requested: params[:user_id], status: :unauthorized}
     end
   end
 
@@ -70,6 +72,11 @@ class Api::V1::TimelogsController < ApplicationController
     end
   end
 
+  def pending
+    @timelog = Timelog.where(finished: false, user_id: params[:user_id])
+    render json: @timelog
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_timelog
@@ -78,6 +85,6 @@ class Api::V1::TimelogsController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def timelog_params
-      params.require(:timelog).permit(:description, :time)
+      params.require(:timelog).permit(:description, :time, :finished)
     end
 end
