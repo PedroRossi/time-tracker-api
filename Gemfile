@@ -13,7 +13,7 @@ gem "fog"
 gem "omniauth"
 gem "omniauth-google-oauth2"
 # [END omniauth]
-
+gem 'certified'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 5.1.4'
 # Use postgresql as the database for Active Record

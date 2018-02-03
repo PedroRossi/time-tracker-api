@@ -8,7 +8,7 @@ Rails.application.routes.draw do
   # [START sessions]
   get "/auth/google_oauth2/callback", to: "sessions#create"
 
-  resources :session, only: [:create, :destroy]
+  resource :session, only: [:create, :destroy]
   # [END sessions]
 
   # [START logout]
