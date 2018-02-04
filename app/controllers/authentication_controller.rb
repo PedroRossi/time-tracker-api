@@ -13,18 +13,20 @@
 
 # [START create]
 class AuthenticationController < ApplicationController
-
   # Handle Google OAuth 2.0 login callback.
   #
   # GET /auth/google_oauth2/callback
   def create
     user_info = request.env["omniauth.auth"]
+    user = User.find()
+    #user = User.new
+    id = user_info["uid"]
+    name = user_info["info"]["name"]
+    photo = user_info["info"]["image"]
+    email = user_info["info"]["email"]
 
-    user = User.new
-    user.id = user_info["uid"]
-    user.name = user_info["info"]["name"]
-    user.photo = user_info["info"]["image"]
-
+    user = User.find(email: email)
+    
     redirect_to "https://google.com"
   end
 # [END create]
