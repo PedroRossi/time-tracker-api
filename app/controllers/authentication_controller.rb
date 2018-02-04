@@ -12,7 +12,7 @@
 # limitations under the License.
 
 # [START create]
-class SessionsController < ApplicationController
+class AuthenticationController < ApplicationController
 
   # Handle Google OAuth 2.0 login callback.
   #
@@ -25,15 +25,13 @@ class SessionsController < ApplicationController
     user.name = user_info["info"]["name"]
     user.photo = user_info["info"]["image"]
 
-    session[:user] = Marshal.dump user
-
     redirect_to "https://google.com"
   end
 # [END create]
 
   # [START destroy]
   def destroy
-    session.delete :user
+    
 
     redirect_to "https://facebook.com"
   end

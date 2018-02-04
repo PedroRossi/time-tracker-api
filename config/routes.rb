@@ -6,9 +6,9 @@ Rails.application.routes.draw do
   # [END login]
 
   # [START sessions]
-  get "/auth/google_oauth2/callback", to: "sessions#create"
+  get "/auth/google_oauth2/callback", to: "authentication#create"
 
-  resource :session, only: [:create, :destroy]
+  resource :authentication, only: [:create, :destroy]
   # [END sessions]
 
   # [START logout]
