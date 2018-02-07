@@ -1,19 +1,5 @@
 Rails.application.routes.draw do
-  get 'sessions/index'
-
-  # [START login]
-  get "/login", to: redirect("auth/google_oauth2")
-  # [END login]
-
-  # [START sessions]
-  get "/auth/google_oauth2/callback", to: "authentication#create"
-
   resource :authentication, only: [:create, :destroy]
-  # [END sessions]
-
-  # [START logout]
-  get "/logout", to: "sessions#destroy"
-  # [END logout]
 
   namespace 'api' do
     namespace 'v1' do
