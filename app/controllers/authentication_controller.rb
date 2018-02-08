@@ -15,7 +15,7 @@
 class AuthenticationController < ApplicationController
   # Handle Google OAuth 2.0 login callback.
   #
-  # GET /auth/google_oauth2/callback
+  # GET /auth/google_oauth2
   def create
     
   end
@@ -24,8 +24,6 @@ class AuthenticationController < ApplicationController
   # [START destroy]
   def destroy
     
-
-    redirect_to "https://facebook.com"
   end
   # [END destroy]
 
