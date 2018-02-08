@@ -12,12 +12,18 @@
 # limitations under the License.
 
 # [START create]
-class AuthenticationController < ApplicationController
+class AuthenticationsController < ApplicationController
+  require 'httparty'
   # Handle Google OAuth 2.0 login callback.
   #
-  # GET /auth/google_oauth2
+  # POST /authorization
   def create
-    
+    code = params[:code]
+    redirect_uri = params[:redirect_uri]
+    options = { :body => {:code => code, :redirect_uri => redirect_uri, :grant_type => "authorization_code", :client_id => "766044722529-hnq5ohm4o3f4jclfs3dq6plgt3ad7nmk.apps.googleusercontent.com", :client_secret => "BGmU7RIlp4HHUA4Fu9LuteDE" } }
+    response = HTTParty.post("https://www.googleapis.com/oauth2/v4/token", options)
+    infos = HTTParty.get("https://www.googleapis.com/oauth2/v1/userinfo", headers: {"Authorization" => "Bearer " + response["access_token"]})
+    render json: JSON.parse(infos.body)
   end
 # [END create]
 
