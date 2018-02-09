@@ -82,6 +82,6 @@ test:
 #
 production:
   <<: *default
-  database: time-tracker-api_production
-  username: time-tracker-api
-  password: <%= ENV['TIME-TRACKER-API_DATABASE_PASSWORD'] %>
+  database: d3o3rqukoerja9
+  username: xexfffhwotghph
+  password: 7b1056dc0ed1bdc7341483ae8b04478c658213aed6d4876af185aca1ec91af35
