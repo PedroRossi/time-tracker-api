@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180204190825) do
+ActiveRecord::Schema.define(version: 20180208225408) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -49,7 +49,7 @@ ActiveRecord::Schema.define(version: 20180204190825) do
     t.string "name"
     t.string "email"
     t.string "photo"
-    t.boolean "isOwner"
+    t.boolean "isOwner", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "accepted", default: false

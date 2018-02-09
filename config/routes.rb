@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
-  resource :authentication, only: [:create, :destroy]
+  post '/oauth2/google', to: "authentication#create"
+  delete '/oauth2/google', to: "authentication#destroy"
 
   namespace 'api' do
     namespace 'v1' do

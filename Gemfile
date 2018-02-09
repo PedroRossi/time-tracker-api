@@ -10,6 +10,7 @@ gem "google-cloud"
 gem "jquery-rails"
 gem "fog"
 gem "httparty"
+gem 'jwt'
 #Stops SSL errors while in localhost
 gem 'certified'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
