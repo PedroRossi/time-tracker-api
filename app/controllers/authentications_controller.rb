@@ -14,8 +14,7 @@
 # [START create]
 class AuthenticationsController < ApplicationController
   require 'httparty'
-  # Handle Google OAuth 2.0 login callback.
-  #
+  
   # POST /oauth2/google
   def create
     code = params[:code]
@@ -33,9 +32,12 @@ class AuthenticationsController < ApplicationController
       user.photo = infos["picture"]
       user.provider = "google"
       if !user.save
-        render json: {status: :unprocessable_entity}
-    
-    
+        render status: :unprocessable_entity
+      end
+    end
+      
+    auth_token = JsonWebToken.encode({user_id: user.id})
+    render json: {auth_token: auth_token}, status: :ok
   end
 # [END create] 
   # [START destroy]

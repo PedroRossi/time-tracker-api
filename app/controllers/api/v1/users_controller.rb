@@ -1,7 +1,10 @@
 class Api::V1::UsersController < ApplicationController
+  before_action :authenticate_request! #Token is allright?
+  before_action :checkAccepted #Is the user requesting this accepted?
+  before_action :checkOwner, except: [:show, :update, :destroy] #Is this user a owner?
+  before_action :checkSameUser(params[:user_id]), :if => params[:user_id], only: [:show, :update, :delete] #Is this user the same user requesting?
   before_action :set_user, only: [:show, :update, :destroy]
   
-  # 1) api/v1/users -------------------> View all users in organization, create new users [Every http method]
   # GET /users
   def index
     @users = User.all

@@ -1,36 +1,22 @@
 class Api::V1::TimelogsController < ApplicationController
+  before_action :authenticate_request! #Token is allright?
+  before_action :checkAccepted #Is the user requesting this accepted?
+  before_action :checkOwner, only: [:show]
   before_action :set_timelog, only: [:show, :update, :destroy]
-
-
-  # 2) api/v1/timelogs -----------------> View all timelogs as organization owner. [Every http method, except create as it needs a project and a user.]
-  # 6) api/v1/users/:user_id/projects/:project_id/timelogs ----> See timelogs from a user in a project, user creates a timelog (maybe temporary) [Index, Update, Create, Destroy]
-  # 5) api/v1/projects/:project_id/timelogs ---------> Project owner sees everybody's timelogs from a project [Index]
+  before action :isTimelogOwner, only: [:show, :update, :destroy]
+ 
+  def isTimelogOwner
+    if !@timelog.user_id == @current_user.id
+      render status: :unauthorized and return 
+  end
 
   # GET /timelogs
   # /timelogs?initialDate=20-01-2018&finalDate=24-01-2018
-
   def index
-    if params[:user_id]
-      if params[:initialDate] && params[:finalDate]
-        @timelogs = User.find(params[:user_id]).timelogs.by_date(params[:initialDate], params[:finalDate]).order('created_at DESC')
-      elsif params[:project_id]
-        @timelogs = User.find(params[:user_id]).timelogs.where(project_id: params[:project_id])
-      else
-        @timelogs = User.find(params[:user_id]).timelogs
-      end
-    elsif params[:project_id]
-      if params[:initialDate] && params[:finalDate]
-        @timelogs = Project.find(params[:project_id]).timelogs.by_date(params[:initialDate], params[:finalDate]).order('created_at DESC')
-      else
-        @timelogs = Project.find(params[:project_id]).timelogs
-      end
+    if params[:initialDate] && params[:finalDate]
+      @timelogs = Timelog.by_date(params[:initialDate, params[:finalDate])
     else
-      if params[:initialDate] && params[:finalDate]
-        @timelogs = Timelog.by_date(params[:initialDate], params[:finalDate]).order('created_at DESC')
-      else
-        @timelogs = Timelog.all
-      end
-    end
+      @timelogs = Timelog.all
     render json: @timelogs
   end
 
@@ -41,7 +27,7 @@ class Api::V1::TimelogsController < ApplicationController
 
   # POST /timelogs
   def create
-    @timelog = Timelog.new(description: params[:timelog][:description], time: params[:timelog][:time], project_id: params[:project_id], user_id: params[:user_id])
+    @timelog = Timelog.new(description: params[:timelog][:description], time: params[:timelog][:time], project_id: params[:project_id], user_id: @current_user.id)
 
     if @timelog.save
       render json: @timelog, status: :created
@@ -52,29 +38,36 @@ class Api::V1::TimelogsController < ApplicationController
 
   # PATCH/PUT /timelogs/1
   def update
-    if @timelog.user_id == params[:user_id].to_i
-      if @timelog.update(timelog_params)
-        render json: @timelog
-      else
-        render json: @timelog.errors, status: :unprocessable_entity
-      end
+    if @timelog.update(timelog_params)
+      render json: @timelog
     else
-      render json: {owner: @timelog.user_id, requested: params[:user_id], status: :unauthorized}
+      render json: @timelog.errors, status: :unprocessable_entity
     end
   end
 
   # DELETE /timelogs/1
   def destroy
-    if @timelog.user_id == params[:user_id].to_i
-      @timelog.destroy
-    else
-      render json: {status: :unauthorized}
-    end
+    @timelog.destroy
   end
 
   def pending
     @timelog = Timelog.where(finished: false, user_id: params[:user_id])
     render json: @timelog
+  end
+
+  #get /user/projects/:project_id/timelogs
+  def show_current_user_timelogs
+    @timelogs = @current_user.timelogs.where(project_id: params[:project_id]).by_date(params[:initialDate], params[:finalDate]).order('created_at DESC')
+    render json: @timelogs
+  end
+
+  #get /projects/:project_id/timelogs
+  def show_project_timelogs
+    if ProjectUser.where(project_id: params[:project_id]).user_id != @current_user.id
+      render json: status: :unauthorized and return
+
+    @timelogs = Timelog.where(project_id: params[:project_id]).by_date(params[:initialDate], params[:finalDate]).order('created_at DESC')
+    render json: @timelogs
   end
 
   private

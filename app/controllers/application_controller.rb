@@ -10,14 +10,65 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# [START helper_methods]
 class ApplicationController < ActionController::Base
- config.navigational_formats = []
-# [END helper_methods]
+    require 'json_web_token'
+    
+    #JSON WEB TOKEN
+    protected
+    # Validates the token and user and sets the @current_user scope
+    def authenticate_request!
+        if !payload || !JsonWebToken.valid_payload(payload.first)
+            return invalid_authentication
+        end
 
- # Prevent CSRF attacks by raising an exception.
- # For APIs, you may want to use :null_session instead.
- # protect_from_forgery with: :exception
- # protect_from_forgery with: :null_session
+        load_current_user!
+        invalid_authentication unless @current_user
+    end
+
+    # Returns 401 response. To handle malformed / invalid requests.
+    def invalid_authentication
+        render json: {error: 'Invalid Request'}, status: :unauthorized
+    end
+
+    private
+    # Deconstructs the Authorization header and decodes the JWT token.
+    def payload
+        auth_header = request.headers['Authorization']
+        token = auth_header.split(' ').last
+        JsonWebToken.decode(token)
+        rescue
+        nil
+    end
+
+    # Sets the @current_user with the user_id from payload
+    def load_current_user!
+        @current_user = User.find_by(id: payload[0]['user_id'])
+    end
+    #FINISH JSON WEB TOKEN
+
+    #HELPER METHODS
+    def checkOwner
+        if !@current_user.isOwner
+            render status: :unauthorized and return
+        end
+    end
+
+    def checkAccepted
+        if !@current_user.accepted
+            render status: :unauthorized and return
+        end
+    end
+
+    def checkSameUser(user_id)
+        if !@current_user.isOwner && !user_id == @current_user.id
+            render status: :unauthorized and return
+        end
+    end
+    #FINISH HELPER METHODS
+
+
+    # Prevent CSRF attacks by raising an exception.
+    # For APIs, you may want to use :null_session instead.
+    # protect_from_forgery with: :exception
+    protect_from_forgery with: :null_session
 end

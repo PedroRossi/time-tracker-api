@@ -4,11 +4,16 @@ Rails.application.routes.draw do
 
   namespace 'api' do
     namespace 'v1' do
-      resources :users #1
+      
+      get "/user/projects", to: "projects#show_current_user_projects"
+      get "/user/projects/:project_id/timelogs", to: "timelogs#show_current_user_timelogs"
+      post "/projects/:project_id/timelogs", to: "timelogs#create"
+      get "/projects/:project_id/timelogs", to: "timelogs#show_project_timelogs"
       get "/timelogs/pending", to: "timelogs#pending"
+      
+      resources :users #1
       resources :timelogs #2
       resources :projects #3
-      resources :users
     end
   end
 end

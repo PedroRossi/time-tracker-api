@@ -1,18 +1,22 @@
 class Api::V1::ProjectsController < ApplicationController
+  before_action :authenticate_request!
+  before_action :checkAccepted #Is the user requesting this accepted?
+  before_action :checkIsOnProject, only: [:show] #Check if user requesting is on project
+  before_action :checkOwner, except: [:show] #Is this user a owner?
   before_action :set_project, only: [:show, :update, :destroy]
   
-  # 3) api/v1/projects -----------------> View all projects as organization and project owner. [Every http method except create as it needs user id]
-  # 4) api/v1/users/:user_id/projects -------------> User views his projects, create a project as organization manager [Index, Create, Destroy]
+  def checkIsOnProject
+    if !@current_user.isOwner && !ProjectUser.where(user_id: @current_user.id, project_id: params[:project_id]).exists?
+        render status: :unauthorized and return
+    end
+  end
+  
   # GET /projects
   def index
-    if params[:user_id]
-      @projects = User.find(params[:user_id]).projects
-    else
-      @projects = Project.all
-    end
+    @projects = Project.all
     render json: @projects
   end 
-
+  
   # GET /projects/1
   def show
     render json: @project
@@ -21,9 +25,6 @@ class Api::V1::ProjectsController < ApplicationController
   # POST /projects
   def create
     @user = User.find(params[:user_id])
-    if !@user.isOwner
-      render json: {status: :unauthorized} and return
-    end
 
     @project = Project.new(project_params)
     if @project.save 
@@ -32,7 +33,7 @@ class Api::V1::ProjectsController < ApplicationController
         render json: @project, status: :created
       else
         @project.destroy
-        render json: {status: :unprocessable_entity}
+        render json: @relation.errors, status: :unprocessable_entity
       end
     else
       render json: @project.errors, status: :unprocessable_entity
@@ -41,11 +42,6 @@ class Api::V1::ProjectsController < ApplicationController
 
   # PATCH/PUT /projects/1
   def update
-    @user = User.find(params[:user_id])
-    if !@user.isOwner
-      render json: {status: :unauthorized} and return
-    end
-    
     if @project.update(project_params)
       render json: @project
     else
@@ -55,13 +51,13 @@ class Api::V1::ProjectsController < ApplicationController
 
   # DELETE /projects/1
   def destroy
-    @user = User.find(params[:user_id])
-    if !@user.isOwner
-      render json: {status: :unauthorized} and return
-    end
-
     ProjectUser.where(project_id: params[:id]).destroy_all
     @project.destroy
+  end
+
+  def show_current_user_projects
+    @projects = @current_user.projects
+    render json: @projects
   end
 
   private
