@@ -1,22 +1,21 @@
 class Api::V1::TimelogsController < ApplicationController
   before_action :authenticate_request! #Token is allright?
   before_action :checkAccepted #Is the user requesting this accepted?
-  before_action :checkOwner, only: [:show]
+  before_action :checkOwner, only: [:index]
   before_action :set_timelog, only: [:show, :update, :destroy]
-  before action :isTimelogOwner, only: [:show, :update, :destroy]
- 
-  def isTimelogOwner
-    if !@timelog.user_id == @current_user.id
-      render status: :unauthorized and return 
+  before_action only: [:show, :update, :destroy] do
+    checkSameUser(@timelog.user_id)
   end
+ 
 
   # GET /timelogs
   # /timelogs?initialDate=20-01-2018&finalDate=24-01-2018
   def index
     if params[:initialDate] && params[:finalDate]
-      @timelogs = Timelog.by_date(params[:initialDate, params[:finalDate])
+      @timelogs = Timelog.by_date(params[:initialDate], params[:finalDate])
     else
       @timelogs = Timelog.all
+    end
     render json: @timelogs
   end
 
@@ -51,7 +50,7 @@ class Api::V1::TimelogsController < ApplicationController
   end
 
   def pending
-    @timelog = Timelog.where(finished: false, user_id: params[:user_id])
+    @timelog = Timelog.where(finished: false, user_id: @current_user.id)
     render json: @timelog
   end
 
@@ -63,8 +62,7 @@ class Api::V1::TimelogsController < ApplicationController
 
   #get /projects/:project_id/timelogs
   def show_project_timelogs
-    if ProjectUser.where(project_id: params[:project_id]).user_id != @current_user.id
-      render json: status: :unauthorized and return
+    isProjectOwner(params[:project_id])
 
     @timelogs = Timelog.where(project_id: params[:project_id]).by_date(params[:initialDate], params[:finalDate]).order('created_at DESC')
     render json: @timelogs

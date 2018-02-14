@@ -2,12 +2,15 @@ class Api::V1::ProjectsController < ApplicationController
   before_action :authenticate_request!
   before_action :checkAccepted #Is the user requesting this accepted?
   before_action :checkIsOnProject, only: [:show] #Check if user requesting is on project
-  before_action :checkOwner, except: [:show] #Is this user a owner?
+  before_action :checkOwner, only: [:index, :create] #Is this user a owner?
+  before_action only: [:update, :destroy] do
+    isProjectOwner(params[:id]) 
+  end
   before_action :set_project, only: [:show, :update, :destroy]
   
   def checkIsOnProject
-    if !@current_user.isOwner && !ProjectUser.where(user_id: @current_user.id, project_id: params[:project_id]).exists?
-        render status: :unauthorized and return
+    if !@current_user.isOwner && !ProjectUser.where(user_id: @current_user.id, project_id: params[:id]).exists?
+        render json: {error: "User is not in the project."}, status: :unauthorized and return
     end
   end
   

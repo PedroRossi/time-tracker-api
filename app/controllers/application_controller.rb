@@ -49,19 +49,25 @@ class ApplicationController < ActionController::Base
     #HELPER METHODS
     def checkOwner
         if !@current_user.isOwner
-            render status: :unauthorized and return
+            render json: {error: "User is not a owner."}, status: :unauthorized and return
         end
     end
 
     def checkAccepted
         if !@current_user.accepted
-            render status: :unauthorized and return
+            render json: {error: "User not accepted."}, status: :unauthorized and return
         end
     end
 
     def checkSameUser(user_id)
-        if !@current_user.isOwner && !user_id == @current_user.id
-            render status: :unauthorized and return
+        if !@current_user.isOwner && !(user_id == @current_user.id)
+            render json: {error: "User is not the resource owner."}, status: :unauthorized and return
+        end
+    end
+    
+    def isProjectOwner(project_id)
+        if !ProjectUser.where(user_id: @current_user.id, project_id: project_id).first.owner
+            render json: {error: "User is not project owner."}, status: :unauthorized and return
         end
     end
     #FINISH HELPER METHODS
@@ -70,5 +76,5 @@ class ApplicationController < ActionController::Base
     # Prevent CSRF attacks by raising an exception.
     # For APIs, you may want to use :null_session instead.
     # protect_from_forgery with: :exception
-    protect_from_forgery with: :null_session
+    # protect_from_forgery with: :null_session
 end

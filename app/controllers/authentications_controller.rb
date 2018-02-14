@@ -22,7 +22,7 @@ class AuthenticationsController < ApplicationController
     options = { :body => {:code => code, :redirect_uri => redirect_uri, :grant_type => "authorization_code", :client_id => "766044722529-hnq5ohm4o3f4jclfs3dq6plgt3ad7nmk.apps.googleusercontent.com", :client_secret => "BGmU7RIlp4HHUA4Fu9LuteDE" } }
     response = HTTParty.post("https://www.googleapis.com/oauth2/v4/token", options)
     infos = HTTParty.get("https://www.googleapis.com/oauth2/v1/userinfo", headers: {"Authorization" => "Bearer " + response["access_token"]})
-    user = User.where(uid: infos["id"])
+    user = User.where(uid: infos["id"]).first
     
     if !user
       user = User.new
@@ -35,7 +35,7 @@ class AuthenticationsController < ApplicationController
         render status: :unprocessable_entity
       end
     end
-      
+    
     auth_token = JsonWebToken.encode({user_id: user.id})
     render json: {auth_token: auth_token}, status: :ok
   end
